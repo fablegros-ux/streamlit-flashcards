@@ -319,7 +319,7 @@ else:
     csv_name = uploaded_csv_file.name
 
     color_name, default_back_color = pick_color_from_filename(csv_name)
-    st.info(f"Couleur par défaut détectée (via nom de fichier) : {color_name}")
+    st.info(f"Couleur par défaut détectée : {color_name}")
 
     cards = read_cards_from_csv(csv_content)
     st.info(f"Lignes lues : {len(cards)} (on utilise les {NB_CARTES} premières)")
@@ -344,6 +344,7 @@ else:
             )
         else:
             st.error("Aucune carte n'a pu être lue depuis le fichier CSV. La génération du PDF est annulée.")
+
 
 
 
