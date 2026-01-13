@@ -301,10 +301,10 @@ def build_pdf(cards: List[Dict[str,str]], default_back_color: colors.Color, outp
 st.title("Générateur de Cartes")
 
 st.write("Uploadez votre fichier CSV et une image PNG avec transparence (facultatif) pour générer des cartes recto/verso.")
-st.write("Le contenu du fichier CSV est constituée de lignes  ma question1 (couleur) ; ma réponse1")
-st.text("                                                     ma question2 (couleur) ; ma réponse2  où couleur est la couleur")
+st.text("Le contenu du fichier CSV est constituée de lignes du type ma question1 (couleur) ; ma réponse1
+                                                                    ma question2 (couleur) ; ma réponse2  où couleur est la couleur")
 st.write("du recto de la carte - choix possibles : bleu, rouge, rose, vert, jaune. ")
-st.write("Si aucune couleur n'est indiquée : maquestion1 ; maréponse1 alors la couleur par défaut est le bleu.")
+st.write("Si aucune couleur n'est indiquée (maquestion1 ; maréponse1)  alors la couleur par défaut est le bleu.")
 
 # CSV Upload
 uploaded_csv_file = st.file_uploader("Uploader le fichier CSV", type=["csv"])
@@ -342,6 +342,7 @@ else:
             )
         else:
             st.error("Aucune carte n'a pu être lue depuis le fichier CSV. La génération du PDF est annulée.")
+
 
 
 
