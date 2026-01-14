@@ -298,10 +298,10 @@ def build_pdf(cards: List[Dict[str,str]], default_back_color: colors.Color, outp
 # ----------------------------
 # Streamlit Application Logic
 # ----------------------------
-st.title("Générateur de Cartes")
+st.title("Générateur de cartes à tout faire")
 
 st.write("Uploadez votre fichier CSV et une image PNG avec transparence (facultatif) pour générer 10 cartes recto/verso sur une feuille A4 pdf.")
-st.text("Le contenu du fichier CSV est constituée de 10 lignes du type :")
+st.text("Le contenu du fichier CSV est constituée au maximum de 10 lignes du type :")
 st.text("ma question1 (couleur) ; ma réponse1")
 st.text("ma question2 (couleur) ; ma réponse2")
 st.text("etc.")
@@ -344,6 +344,7 @@ else:
             )
         else:
             st.error("Aucune carte n'a pu être lue depuis le fichier CSV. La génération du PDF est annulée.")
+
 
 
 
