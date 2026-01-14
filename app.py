@@ -1,4 +1,3 @@
-#```python
 import os, re, csv, io
 import tempfile
 from typing import List, Dict, Tuple, Optional
@@ -229,6 +228,8 @@ def build_pdf(cards: List[Dict[str,str]], default_back_color: colors.Color, outp
         c.setFillColor(current_back_color)
         c.rect(x, y, grid.card_w, grid.card_h, stroke=0, fill=1)
 
+        question_text_for_card = cards10[i].get("question", "").strip()
+
         image_to_draw_path = None
         if original_pil_image:
             try:
@@ -251,29 +252,47 @@ def build_pdf(cards: List[Dict[str,str]], default_back_color: colors.Color, outp
 
 
         if image_to_draw_path:
-            img_h = grid.card_h / 2
-            img_w = img_h
+            if not question_text_for_card:
+                # No text, image takes up 90% of card height, centered
+                img_h = 0.9 * grid.card_h
+                img_w = img_h # Maintain 1:1 aspect ratio
+                img_x = x + (grid.card_w - img_w) / 2 # Center horizontally
+                img_y = y + (grid.card_h - img_h) / 2 # Center vertically
+                
+                try:
+                    c.drawImage(image_to_draw_path, img_x, img_y,
+                                width=img_w, height=img_h, preserveAspectRatio=True)
+                except Exception as e:
+                    st.error(f"Erreur lors du dessin de l'image (90% hauteur, sans texte) : {e}")
+                    # If image drawing fails, draw empty text centrally as a fallback
+                    draw_centered_text_in_box(c, x, y, grid.card_w, grid.card_h, "", style_recto)
+            else:
+                # Text is present, use original image/text layout
+                img_h = grid.card_h / 2
+                img_w = img_h
 
-            img_x = x + (grid.card_w - img_w) / 2
-            img_y = y + ELEMENT_SPACING
+                img_x = x + (grid.card_w - img_w) / 2
+                img_y = y + ELEMENT_SPACING
 
-            text_box_h = grid.card_h - (3 * ELEMENT_SPACING + img_h)
+                text_box_h = grid.card_h - (3 * ELEMENT_SPACING + img_h)
 
-            text_box_x = x
-            text_box_y = img_y + img_h + ELEMENT_SPACING
-            text_box_w = grid.card_w
+                text_box_x = x
+                text_box_y = img_y + img_h + ELEMENT_SPACING
+                text_box_w = grid.card_w
 
-            try:
-                c.drawImage(image_to_draw_path, img_x, img_y,
-                            width=img_w, height=img_h, preserveAspectRatio=True)
-            except Exception as e:
-                st.error(f"Erreur lors du dessin de l'image (après prétraitement) : {e}")
-                draw_centered_text_in_box(c, x, y, grid.card_w, grid.card_h, cards10[i].get("question", ""), style_recto)
-                continue
+                try:
+                    c.drawImage(image_to_draw_path, img_x, img_y,
+                                width=img_w, height=img_h, preserveAspectRatio=True)
+                except Exception as e:
+                    st.error(f"Erreur lors du dessin de l'image (avec texte) : {e}")
+                    # Fallback: draw text in full card area if image drawing still fails
+                    draw_centered_text_in_box(c, x, y, grid.card_w, grid.card_h, question_text_for_card, style_recto)
+                    continue
 
-            draw_centered_text_in_box(c, text_box_x, text_box_y, text_box_w, text_box_h, cards10[i].get("question", ""), style_recto)
+                draw_centered_text_in_box(c, text_box_x, text_box_y, text_box_w, text_box_h, question_text_for_card, style_recto)
         else:
-            draw_centered_text_in_box(c, x, y, grid.card_w, grid.card_h, cards10[i].get("question", ""), style_recto)
+            # No image or image processing failed, draw text in the full card area
+            draw_centered_text_in_box(c, x, y, grid.card_w, grid.card_h, question_text_for_card, style_recto)
 
     c.showPage()
 
@@ -319,7 +338,7 @@ else:
     csv_name = uploaded_csv_file.name
 
     color_name, default_back_color = pick_color_from_filename(csv_name)
-    st.info(f"Couleur par défaut détectée : {color_name}")
+    st.info(f"Couleur par défaut détectée (via nom de fichier) : {color_name}")
 
     cards = read_cards_from_csv(csv_content)
     st.info(f"Lignes lues : {len(cards)} (on utilise les {NB_CARTES} premières)")
@@ -344,15 +363,3 @@ else:
             )
         else:
             st.error("Aucune carte n'a pu être lue depuis le fichier CSV. La génération du PDF est annulée.")
-
-
-
-
-
-
-
-
-
-
-
-
